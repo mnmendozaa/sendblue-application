@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sendblue Short-Form Editor Application</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:    #282943;
+    --deep:    #363754;
+    --blue:    #008BFF;
+    --lavender:#AEB2EB;
+    --white:   #FFFFFF;
+    --black:   #000000;
+    --surface: #F4F5FB;
+    --border:  #D8DAEE;
+    --danger:  #E05252;
+    --success: #27AE60;
+    --text:    #282943;
+    --muted:   #6B6F9A;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: 'Montserrat', sans-serif;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ── LAYOUT ── */
+  .app {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    background: var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    color: var(--white);
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .logo-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--blue);
+    display: inline-block;
+  }
+
+  .topbar-right {
+    font-size: 12px;
+    color: var(--lavender);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── PROGRESS ── */
+  .progress-wrap {
+    background: var(--deep);
+    height: 3px;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: var(--blue);
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* ── MAIN ── */
+  main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 20px 80px;
+  }
+
+  /* ── SECTION INDICATOR ── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 10px;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--white);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 680px;
+    padding: 48px 52px;
+    box-shadow: 0 2px 20px rgba(40,41,67,0.07);
+    display: none;
+    animation: fadeUp 0.3s ease;
+  }
+
+  .card.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Welcome / Decline / Thank-you cards */
+  .card--hero {
+    background: var(--navy);
+    color: var(--white);
+    text-align: center;
+    padding: 64px 52px;
+  }
+
+  .card--hero .section-label { color: var(--lavender); }
+
+  .card--decline {
+    background: var(--white);
+    text-align: center;
+    padding: 64px 52px;
+  }
+
+  /* ── CARD HEADER ── */
+  .card-section-tag {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 6px;
+  }
+
+  .card-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 26px;
+    color: var(--navy);
+    line-height: 1.2;
+    margin-bottom: 8px;
+    letter-spacing: -0.3px;
+  }
+
+  .card--hero .card-title {
+    font-size: 32px;
+    color: var(--white);
+    margin-bottom: 16px;
+  }
+
+  .card-subtitle {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 36px;
+    line-height: 1.7;
+  }
+
+  .card--hero .card-subtitle {
+    color: var(--lavender);
+    font-size: 15px;
+    max-width: 480px;
+    margin: 0 auto 40px;
+  }
+
+  .card-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 28px 0;
+  }
+
+  /* ── QUESTIONS ── */
+  .q-group {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .q-item {}
+
+  .q-label {
+    display: block;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--navy);
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+
+  .q-num {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--blue);
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+    display: block;
+  }
+
+  .q-hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    line-height: 1.5;
+    font-style: italic;
+  }
+
+  /* INPUTS */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="number"],
+  input[type="date"],
+  select,
+  textarea {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 14px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    color: var(--navy);
+    background: var(--surface);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--blue);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(0,139,255,0.1);
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 110px;
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6F9A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+    cursor: pointer;
+  }
+
+  /* RADIO / CHECKBOX */
+  .choices { display: flex; flex-direction: column; gap: 8px; }
+  .choices--inline { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+
+  .choice-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    user-select: none;
+  }
+
+  .choice-item:hover { border-color: var(--blue); background: #F0F6FF; }
+
+  .choice-item.selected {
+    border-color: var(--blue);
+    background: #E8F4FF;
+  }
+
+  .choice-item input[type="radio"],
+  .choice-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    background: white;
+    appearance: none;
+    -webkit-appearance: none;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: border-color 0.15s, background 0.15s;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+  }
+
+  .choice-item input[type="checkbox"] { border-radius: 4px; }
+
+  .choice-item input[type="radio"]:checked,
+  .choice-item input[type="checkbox"]:checked {
+    border-color: var(--blue);
+    background: var(--blue);
+  }
+
+  .choice-item input[type="radio"]:checked::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: white;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .choice-item input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    width: 9px;
+    height: 6px;
+    border-left: 2px solid white;
+    border-bottom: 2px solid white;
+    top: 44%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg);
+  }
+
+  .choice-label { font-size: 14px; color: var(--text); font-weight: 500; }
+
+  /* OPINION SCALE */
+  .scale-wrap {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .scale-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Montserrat', sans-serif;
+    flex-shrink: 0;
+  }
+
+  .scale-btn:hover { border-color: var(--blue); color: var(--blue); }
+  .scale-btn.selected { background: var(--blue); border-color: var(--blue); color: white; }
+
+  .scale-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  /* FILE UPLOAD */
+  .file-drop {
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    padding: 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    background: var(--surface);
+    position: relative;
+  }
+
+  .file-drop:hover { border-color: var(--blue); background: #F0F6FF; }
+  .file-drop input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+
+  .file-drop-icon {
+    width: 36px;
+    height: 36px;
+    margin: 0 auto 10px;
+    opacity: 0.4;
+  }
+
+  .file-drop-text { font-size: 13px; color: var(--muted); }
+  .file-drop-text strong { color: var(--blue); }
+
+  .file-name { font-size: 13px; color: var(--success); font-weight: 600; margin-top: 8px; }
+
+  /* YN TOGGLE */
+  .yn-wrap { display: flex; gap: 10px; }
+
+  .yn-btn {
+    flex: 1;
+    padding: 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--surface);
+    color: var(--muted);
+  }
+
+  .yn-btn:hover { border-color: var(--blue); color: var(--blue); }
+  .yn-btn.selected-yes { background: #E8F4FF; border-color: var(--blue); color: var(--blue); }
+  .yn-btn.selected-no  { background: #FEF0F0; border-color: var(--danger); color: var(--danger); }
+
+  /* REQUIRED MARKER */
+  .req { color: var(--blue); margin-left: 2px; }
+
+  /* ERROR */
+  .field-error {
+    font-size: 12px;
+    color: var(--danger);
+    margin-top: 5px;
+    display: none;
+    font-weight: 500;
+  }
+
+  .field-error.show { display: block; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 28px;
+    border-radius: 8px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-primary {
+    background: var(--blue);
+    color: white;
+  }
+
+  .btn-primary:hover { background: #007AE0; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,139,255,0.3); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--muted);
+    border: 1.5px solid var(--border);
+  }
+
+  .btn-secondary:hover { border-color: var(--navy); color: var(--navy); }
+
+  .btn-hero {
+    background: var(--blue);
+    color: white;
+    font-size: 15px;
+    padding: 15px 36px;
+    border-radius: 10px;
+    margin-top: 4px;
+  }
+
+  .btn-hero:hover { background: #007AE0; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,139,255,0.35); }
+
+  .btn-outline-white {
+    background: transparent;
+    color: var(--white);
+    border: 1.5px solid rgba(255,255,255,0.3);
+  }
+
+  .btn-outline-white:hover { background: rgba(255,255,255,0.08); }
+
+  /* ── NAV FOOTER ── */
+  .nav-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 40px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+  }
+
+  .nav-footer--center { justify-content: center; }
+
+  /* ── DISQUALIFIER SCREEN ── */
+  .decline-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #FEF0F0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+  }
+
+  .thankyou-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #E8F5EE;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+  }
+
+  .decline-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 12px;
+  }
+
+  .decline-body {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.8;
+    max-width: 440px;
+    margin: 0 auto 28px;
+  }
+
+  /* ── SECTION DIVIDER ── */
+  .section-header {
+    background: var(--navy);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .section-header-letter {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--blue);
+    width: 40px;
+    flex-shrink: 0;
+  }
+
+  .section-header-info {}
+
+  .section-header-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--white);
+    margin-bottom: 2px;
+  }
+
+  .section-header-desc {
+    font-size: 12px;
+    color: var(--lavender);
+    line-height: 1.5;
+  }
+
+  /* ── STEP COUNTER ── */
+  .step-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 680px;
+    margin-bottom: 12px;
+  }
+
+  .step-meta-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+
+  .step-meta-count {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  /* ── TWO-COL ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  @media (max-width: 560px) {
+    .card { padding: 32px 24px; }
+    .card--hero { padding: 48px 24px; }
+    .two-col { grid-template-columns: 1fr; }
+    .topbar { padding: 0 20px; }
+    .scale-wrap { flex-wrap: wrap; }
+  }
+
+  /* ── ITALIC EDITORIAL ── */
+  em.editorial {
+    font-family: 'Times New Roman', Times, serif;
+    font-style: italic;
+    color: var(--blue);
+    font-size: inherit;
+  }
+
+  /* ── DISQUALIFIER TAG ── */
+  .disq-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: #FEF0F0;
+    color: var(--danger);
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  .soft-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: #FFF8E1;
+    color: #C68A00;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  /* ── ACKNOWLEDGEMENT ITEM ── */
+  .ack-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 14px;
+    background: var(--surface);
+  }
+
+  .ack-item .ack-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--navy);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ack-item .ack-body { flex: 1; }
+  .ack-item .ack-title { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+  .ack-item .ack-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* ── CAPTION EXERCISE ── */
+  .caption-box {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 20px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    color: var(--navy);
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- TOPBAR -->
+  <header>
+    <div class="topbar">
+      <div class="logo">
+        <img src="data:image/png;base64,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AAAAAKCADIEAAAAAAABQQIZAAAAAAAAAKCBDIAAAAAAAABSQIRAAAAAAAAAKyBAIAAAAAAAABWQIBAAAAAAAgAIyBAIAAAAAAEABGQIBAAAAAACggAyBAAAAAAAAUECGQAAAAAAAACggQyAAAAAAAAAUkCEQAAAAAAAACsgQCAAAAAAAAAVkCAQAAAAAAIACMgQCAAAAAABAARkCAQAAAAAAoIAMgQAAAAAAAFBAhkAAAAAAAAAoIEMgAAAAAAAAFJAhEAAAAAAAAArIEAgAAAAAAAAFZAgEAAAAAACAAjIEAgAAAAAAQAEZAgEAAAAAAKCADIEAAAAAAABQQIZAAAAAAAAAKCBDIAAAAAAAABSQIRAAAAAAAAAKyBAIAAAAAAAABWQIBAAAAAAAgAIyBAIAAAAAAEABGQIBAAAAAACggAyBAAAAAAAAUECGQAAAAAAAACggQyAAAAAAAAAUkCEQAAAAAAAACsgQCAAAAAAAAAVkCAQAAAAAAIACMgQCAAAAAABAARkCAQAAAAAAoIAMgQAAAAAAAFBAhkAAAAAAAAAoIEMgAAAAAAAAFJAhEAAAAAAAAArIEAgAAAAAAAAFZAgEAAAAAACAAjIEAgAAAAAAQAEZAgEAAAAAAKCADIEAAAAAAABQQIZAAAAAAAAAKCBDIAAAAAAAABSQIRAAAAAAAAAKyBAIAAAAAAAABWQIBAAAAAAAgAIyBAIAAAAAAEABGQIBAAAAAACggAyBAAAAAAAAUECGQAAAAAAAACggQyAAAAAAAAAUkCEQAAAAAAAACsgQCAAAAAAAAAVkCAQAAAAAAIACMgQCAAAAAABAARkCAQAAAAAAoIAMgQAAAAAAAFBAhkAAAAAAAAAoIEMgAAAAAAAAFJAhEAAAAAAAAArIEAgAAAAAAAAFZAgEAAAAAACAAjIEAgAAAAAAQAEZAgEAAAAAAKCADIEAAAAAAABQQIZAAAAAAAAAKCBDIAAAAAAAABSQIRAAAAAAAAAKyBAIAAAAAAAABWQIBAAAAAAAgAIyBAIAAAAAAEABGQIBAAAAAACggAyBAAAAAAAAUECGQAAAAAAAACggQyAAAAAAAAAUkCEQAAAAAAAACsgQCAAAAAAAAAVkCAQAAAAAAIACMgQCAAAAAABAARkCAQAAAAAAoIAMgQAAAAAAAFBAhkAAAAAAAAAoIEMgAAAAAAAAFJAhEAAAAAAAAArIEAgAAAAAAAAFZAgEAAAAAACAAjIEAgAAAAAAQAEZAgEAAAAAAKCADIEAAAAAAABQQIZAAAAAAAAAKCBDIAAAAAAAABSQIRAAAAAAAAAKyBAIAAAAAAAABWQIBAAAAAAAgAIyBAIAAAAAAEABGQIBAAAAAACggAyBAAAAAAAAUECGQAAAAAAAACggQyAAAAAAAAAUkCEQAAAAAAAACsgQCAAAAAAAAAVkCAQAAAAAAIBQPP8f4Fpn48RO9SwAAAAASUVORK5CYII=" alt="Sendblue" style="height:36px;width:auto;display:block;">
+      </div>
+      <div class="topbar-right">Short-Form Editor Application</div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+  </header>
+
+  <main id="mainContent">
+
+    <!-- STEP META -->
+    <div class="step-meta" id="stepMeta" style="display:none;">
+      <span class="step-meta-label" id="stepSectionLabel"></span>
+      <span class="step-meta-count" id="stepCount"></span>
+    </div>
+
+    <!-- ===================== SECTION A: WELCOME ===================== -->
+    <div class="card card--hero active" id="step-welcome">
+      <div class="card-section-tag">Short-Form Editor Application</div>
+      <h1 class="card-title">Thanks for your interest in <em class="editorial">joining</em> the Sendblue editing team.</h1>
+      <div style="margin: 24px 0; border-radius: 12px; overflow: hidden; padding: 56.25% 0 0 0; position: relative;">
+        <iframe id="introVideo" src="https://drive.google.com/file/d/1T9vM7tvPWKE9urskU3S2IDNlgaypkEwT/preview" frameborder="0" allow="autoplay; fullscreen" style="position:absolute;top:0;left:0;width:100%;height:100%;border-radius:12px;" title="Sendblue Overview"></iframe>
+      </div>
+      <p style="font-size:12px;color:var(--lavender);text-align:center;margin:-8px 0 16px;opacity:0.8;">Watch the full video to continue</p>
+      <p class="card-subtitle">We're hiring two editors, and this form is how we figure out who's a fit before either side spends time on a call. It takes about 15–20 minutes if you take it seriously. We recommend you do. We read every answer.<br><br>We care about clarity, taste, and consistency more than flashy effects. Zero caption or spelling errors is non-negotiable for our team. Be honest. We'd rather know now than three weeks in.</p>
+      <button class="btn btn-hero" id="letsGoBtn" disabled onclick="goToStep('step-B')" style="opacity:0.5;cursor:not-allowed;">Watch the video to continue (<span id="countdown">4:44</span>)</button>
+    </div>
+
+    <!-- ===================== SECTION B: IDENTITY ===================== -->
+    <div class="card" id="step-B">
+      <div class="section-header">
+        <div class="section-header-letter">B</div>
+        <div class="section-header-info">
+          <div class="section-header-title">Identity &amp; Location</div>
+          <div class="section-header-desc">Basic contact, location, time zone, and work eligibility</div>
+        </div>
+      </div>
+
+      <div class="q-group">
+        <div class="two-col">
+          <div class="q-item">
+            <span class="q-num">Q1</span>
+            <label class="q-label" for="q1">First name <span class="req">*</span></label>
+            <input type="text" id="q1" placeholder="First name" required>
+            <div class="field-error" id="err-q1">Please enter your first name.</div>
+          </div>
+          <div class="q-item">
+            <span class="q-num">Q2</span>
+            <label class="q-label" for="q2">Last name <span class="req">*</span></label>
+            <input type="text" id="q2" placeholder="Last name" required>
+            <div class="field-error" id="err-q2">Please enter your last name.</div>
+          </div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q3</span>
+          <label class="q-label" for="q3">Email address <span class="req">*</span></label>
+          <input type="email" id="q3" placeholder="you@example.com" required>
+          <div class="field-error" id="err-q3">Please enter a valid email.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q4</span>
+          <label class="q-label" for="q4">WhatsApp or phone number <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+          <input type="tel" id="q4" placeholder="+1 (555) 000-0000">
+        </div>
+
+        <div class="two-col">
+          <div class="q-item">
+            <span class="q-num">Q5</span>
+            <label class="q-label" for="q5">Country <span class="req">*</span></label>
+            <select id="q5" required>
+              <option value="">— Select country —</option>
+              <option>United States</option><option>United Kingdom</option><option>Canada</option>
+              <option>Australia</option><option>Philippines</option><option>India</option>
+              <option>Nigeria</option><option>South Africa</option><option>Brazil</option>
+              <option>Mexico</option><option>Colombia</option><option>Argentina</option>
+              <option>Germany</option><option>France</option><option>Spain</option>
+              <option>Italy</option><option>Netherlands</option><option>Poland</option>
+              <option>Ukraine</option><option>Pakistan</option><option>Bangladesh</option>
+              <option>Indonesia</option><option>Vietnam</option><option>Other</option>
+            </select>
+            <div class="field-error" id="err-q5">Please select your country.</div>
+          </div>
+          <div class="q-item">
+            <span class="q-num">Q6</span>
+            <label class="q-label" for="q6">City <span class="req">*</span></label>
+            <input type="text" id="q6" placeholder="Your city" required>
+            <div class="field-error" id="err-q6">Please enter your city.</div>
+          </div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q7</span>
+          <label class="q-label" for="q7">Time zone <span class="req">*</span></label>
+          <select id="q7" required>
+            <option value="">— Select time zone —</option>
+            <option>UTC −12:00</option><option>UTC −11:00</option><option>UTC −10:00 (Hawaii)</option>
+            <option>UTC −08:00 (Pacific)</option><option>UTC −07:00 (Mountain)</option>
+            <option>UTC −06:00 (Central)</option><option>UTC −05:00 (Eastern)</option>
+            <option>UTC −04:00 (Atlantic)</option><option>UTC −03:00</option>
+            <option>UTC 00:00 (GMT/London)</option><option>UTC +01:00 (CET)</option>
+            <option>UTC +02:00 (EET)</option><option>UTC +03:00 (EAT/Moscow)</option>
+            <option>UTC +04:00</option><option>UTC +05:00</option><option>UTC +05:30 (India)</option>
+            <option>UTC +06:00</option><option>UTC +07:00 (ICT)</option>
+            <option>UTC +08:00 (SGT/PHT)</option><option>UTC +09:00 (JST/KST)</option>
+            <option>UTC +10:00 (AEST)</option><option>UTC +11:00</option>
+            <option>UTC +12:00 (NZST)</option>
+          </select>
+          <div class="field-error" id="err-q7">Please select your time zone.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q8 </span>
+          <label class="q-label">Are you legally able to work as an independent contractor in your country? <span class="req">*</span></label>
+          <div class="yn-wrap">
+            <button type="button" class="yn-btn" data-q="q8" data-val="yes" onclick="selectYN(this,'q8','yes')">Yes</button>
+            <button type="button" class="yn-btn" data-q="q8" data-val="no" onclick="selectYN(this,'q8','no')">No</button>
+          </div>
+          <div class="field-error" id="err-q8">Please answer this question.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q9 </span>
+          <label class="q-label" for="q9">Link to your portfolio, reel, or showcase <span class="req">*</span></label>
+          <p class="q-hint">A Notion page, personal site, or shareable Drive folder all work. No portfolio = no review.</p>
+          <input type="url" id="q9" placeholder="https://" required>
+          <div class="field-error" id="err-q9">A valid portfolio link is required.</div>
+        </div>
+      </div>
+
+      <div class="nav-footer">
+        <button class="btn btn-secondary" onclick="goToStep('step-welcome')">← Back</button>
+        <button class="btn btn-primary" onclick="nextSection('B')">Continue →</button>
+      </div>
+    </div>
+
+    <!-- ===================== SECTION C: LANGUAGE ===================== -->
+    <div class="card" id="step-C">
+      <div class="section-header">
+        <div class="section-header-letter">C</div>
+        <div class="section-header-info">
+          <div class="section-header-title">Language &amp; Communication</div>
+          <div class="section-header-desc">Fluency in English is required for caption QC and live calls</div>
+        </div>
+      </div>
+
+      <div class="q-group">
+        <div class="q-item">
+          <span class="q-num">Q10</span>
+          <label class="q-label">Is English your native language? <span class="req">*</span></label>
+          <div class="choices">
+            <label class="choice-item" onclick="selectChoice(this,'q10')">
+              <input type="radio" name="q10" value="yes"> <span class="choice-label">Yes</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q10')">
+              <input type="radio" name="q10" value="no"> <span class="choice-label">No</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q10')">
+              <input type="radio" name="q10" value="bilingual"> <span class="choice-label">Bilingual native (English + one other)</span>
+            </label>
+          </div>
+          <div class="field-error" id="err-q10">Please select an option.</div>
+        </div>
+
+        <div class="q-item" id="q11-wrap">
+          <span class="q-num">Q11 </span>
+          <label class="q-label">Written English rating <span class="req">*</span></label>
+          <div class="scale-wrap" id="scale-q11"></div>
+          <div class="scale-labels"><span>1: Basic</span><span>3: Workable</span><span>5: Native-level</span></div>
+          <div class="field-error" id="err-q11">Please rate your written English.</div>
+        </div>
+
+        <div class="q-item" id="q12-wrap">
+          <span class="q-num">Q12 </span>
+          <label class="q-label">Spoken English rating <span class="req">*</span></label>
+          <div class="scale-wrap" id="scale-q12"></div>
+          <div class="scale-labels"><span>1: Basic</span><span>3: Workable</span><span>5: Native-level</span></div>
+          <div class="field-error" id="err-q12">Please rate your spoken English.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q13</span>
+          <label class="q-label" for="q13">Other languages you speak fluently <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+          <input type="text" id="q13" placeholder="e.g. Spanish, French, Mandarin">
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q14 </span>
+          <label class="q-label">Are you comfortable on live video calls in English? <span class="req">*</span></label>
+          <p class="q-hint">Briefs, revisions, occasional team meetings.</p>
+          <div class="yn-wrap">
+            <button type="button" class="yn-btn" onclick="selectYN(this,'q14','yes')">Yes</button>
+            <button type="button" class="yn-btn" onclick="selectYN(this,'q14','no')">No</button>
+          </div>
+          <div class="field-error" id="err-q14">Please answer this question.</div>
+        </div>
+      </div>
+
+      <div class="nav-footer">
+        <button class="btn btn-secondary" onclick="goToStep('step-B')">← Back</button>
+        <button class="btn btn-primary" onclick="nextSection('C')">Continue →</button>
+      </div>
+    </div>
+
+    <!-- ===================== SECTION D: CONNECTIVITY ===================== -->
+    <div class="card" id="step-D">
+      <div class="section-header">
+        <div class="section-header-letter">D</div>
+        <div class="section-header-info">
+          <div class="section-header-title">Connectivity</div>
+          <div class="section-header-desc">Slow or unreliable internet is a hidden tax on the entire team</div>
+        </div>
+      </div>
+
+      <div class="q-group">
+        <div class="two-col">
+          <div class="q-item">
+            <span class="q-num">Q15 </span>
+            <label class="q-label" for="q15">Download speed (Mbps) <span class="req">*</span></label>
+            <p class="q-hint">Run a test at speedtest.net before answering.</p>
+            <input type="number" id="q15" placeholder="e.g. 150" min="0" required>
+            <div class="field-error" id="err-q15">Please enter your download speed.</div>
+          </div>
+          <div class="q-item">
+            <span class="q-num">Q16 </span>
+            <label class="q-label" for="q16">Upload speed (Mbps) <span class="req">*</span></label>
+            <p class="q-hint">Upload speed matters more for large export files.</p>
+            <input type="number" id="q16" placeholder="e.g. 50" min="0" required>
+            <div class="field-error" id="err-q16">Please enter your upload speed.</div>
+          </div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q17 </span>
+          <label class="q-label">Speed test screenshot <span class="req">*</span></label>
+          <p class="q-hint">Verifies the numbers above. Mismatch = flag. No screenshot = hard disqualifier.</p>
+          <div class="file-drop" id="fileDrop">
+            <input type="file" accept="image/*" id="q17" onchange="handleFile(this)">
+            <svg class="file-drop-icon" viewBox="0 0 36 36" fill="none" stroke="#AEB2EB" stroke-width="1.5">
+              <rect x="4" y="6" width="28" height="24" rx="3"/>
+              <path d="M18 12v10M13 17l5-5 5 5"/>
+            </svg>
+            <div class="file-drop-text"><strong>Click to upload</strong> or drag &amp; drop</div>
+            <div class="file-drop-text" style="margin-top:4px">PNG, JPG, WEBP accepted</div>
+            <div class="file-name" id="fileName"></div>
+          </div>
+          <div class="field-error" id="err-q17">Please upload your speed test screenshot.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q18 </span>
+          <label class="q-label">How reliable is your internet connection? <span class="req">*</span></label>
+          <div class="choices">
+            <label class="choice-item" onclick="selectChoice(this,'q18')">
+              <input type="radio" name="q18" value="stable"> <span class="choice-label">Stable 24/7 with rare interruptions</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q18')">
+              <input type="radio" name="q18" value="occasional"> <span class="choice-label">Occasional dropouts (1–2/week)</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q18')">
+              <input type="radio" name="q18" value="frequent"> <span class="choice-label">Frequent issues (multiple per week)</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q18')">
+              <input type="radio" name="q18" value="other"> <span class="choice-label">Other (please specify)</span>
+            </label>
+          </div>
+          <div class="field-error" id="err-q18">Please select an option.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q19</span>
+          <label class="q-label">Do you have a backup internet option (hotspot, second ISP, etc.)? <span class="req">*</span></label>
+          <div class="yn-wrap">
+            <button type="button" class="yn-btn" onclick="selectYN(this,'q19','yes')">Yes</button>
+            <button type="button" class="yn-btn" onclick="selectYN(this,'q19','no')">No</button>
+          </div>
+          <div class="field-error" id="err-q19">Please answer this question.</div>
+        </div>
+      </div>
+
+      <div class="nav-footer">
+        <button class="btn btn-secondary" onclick="goToStep('step-C')">← Back</button>
+        <button class="btn btn-primary" onclick="nextSection('D')">Continue →</button>
+      </div>
+    </div>
+
+    <!-- ===================== SECTION E: HARDWARE ===================== -->
+    <div class="card" id="step-E">
+      <div class="section-header">
+        <div class="section-header-letter">E</div>
+        <div class="section-header-info">
+          <div class="section-header-title">Hardware &amp; Software</div>
+          <div class="section-header-desc">Standard stack: Premiere Pro, After Effects, Frame.io, Google Drive</div>
+        </div>
+      </div>
+
+      <div class="q-group">
+        <div class="q-item">
+          <span class="q-num">Q20</span>
+          <label class="q-label">Primary editing computer <span class="req">*</span></label>
+          <div class="choices">
+            <label class="choice-item" onclick="selectChoice(this,'q20')">
+              <input type="radio" name="q20" value="mac-as"> <span class="choice-label">Mac (Apple Silicon (M1/M2/M3/M4))</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q20')">
+              <input type="radio" name="q20" value="mac-intel"> <span class="choice-label">Mac (Intel)</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q20')">
+              <input type="radio" name="q20" value="win-high"> <span class="choice-label">Windows (high-spec)</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q20')">
+              <input type="radio" name="q20" value="win-mid"> <span class="choice-label">Windows (mid-spec)</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q20')">
+              <input type="radio" name="q20" value="linux"> <span class="choice-label">Linux</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q20')">
+              <input type="radio" name="q20" value="other"> <span class="choice-label">Other</span>
+            </label>
+          </div>
+          <div class="field-error" id="err-q20">Please select your computer type.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q21 </span>
+          <label class="q-label" for="q21">Computer specs (RAM, storage, CPU) <span class="req">*</span></label>
+          <p class="q-hint">Example: 'M2 Pro Mac, 32GB RAM, 1TB SSD' or 'Windows i9, 64GB RAM, 2TB NVMe'</p>
+          <input type="text" id="q21" placeholder="e.g. M3 Pro, 36GB RAM, 1TB SSD" required>
+          <div class="field-error" id="err-q21">Please describe your computer specs.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q22 </span>
+          <label class="q-label">Do you own quality wired or studio-grade headphones? <span class="req">*</span></label>
+          <p class="q-hint">Headphones are a non-negotiable part of our audio QC standard.</p>
+          <div class="yn-wrap">
+            <button type="button" class="yn-btn" onclick="selectYN(this,'q22','yes')">Yes</button>
+            <button type="button" class="yn-btn" onclick="selectYN(this,'q22','no')">No</button>
+          </div>
+          <div class="field-error" id="err-q22">Please answer this question.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q23</span>
+          <label class="q-label">Editing software fluency <span class="req">*</span> <em style="font-size:12px;color:var(--muted);font-style:normal;font-weight:400">(select all that apply)</em></label>
+          <div class="choices">
+            <label class="choice-item" onclick="selectChoice(this,'q23',true)">
+              <input type="checkbox" name="q23" value="premiere"> <span class="choice-label">Adobe Premiere Pro</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q23',true)">
+              <input type="checkbox" name="q23" value="ae"> <span class="choice-label">Adobe After Effects</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q23',true)">
+              <input type="checkbox" name="q23" value="fcp"> <span class="choice-label">Final Cut Pro</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q23',true)">
+              <input type="checkbox" name="q23" value="resolve"> <span class="choice-label">DaVinci Resolve</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q23',true)">
+              <input type="checkbox" name="q23" value="capcut"> <span class="choice-label">CapCut Pro</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q23',true)">
+              <input type="checkbox" name="q23" value="other"> <span class="choice-label">Other</span>
+            </label>
+          </div>
+          <div class="field-error" id="err-q23">Please select at least one.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q24</span>
+          <label class="q-label">Years of experience with your primary editing software <span class="req">*</span></label>
+          <div class="choices choices--inline">
+            <label class="choice-item" onclick="selectChoice(this,'q24')">
+              <input type="radio" name="q24" value="lt1"> <span class="choice-label">Less than 1</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q24')">
+              <input type="radio" name="q24" value="1-2"> <span class="choice-label">1–2 years</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q24')">
+              <input type="radio" name="q24" value="3-5"> <span class="choice-label">3–5 years</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q24')">
+              <input type="radio" name="q24" value="5plus"> <span class="choice-label">5+ years</span>
+            </label>
+          </div>
+          <div class="field-error" id="err-q24">Please select an option.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q25</span>
+          <label class="q-label">Have you used Frame.io for review and revisions before? <span class="req">*</span></label>
+          <div class="choices">
+            <label class="choice-item" onclick="selectChoice(this,'q25')">
+              <input type="radio" name="q25" value="yes-reg"> <span class="choice-label">Yes, regularly</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q25')">
+              <input type="radio" name="q25" value="yes-occ"> <span class="choice-label">Yes, occasionally</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q25')">
+              <input type="radio" name="q25" value="familiar"> <span class="choice-label">No, but I'm familiar with it</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q25')">
+              <input type="radio" name="q25" value="new"> <span class="choice-label">No, would be new to me</span>
+            </label>
+          </div>
+          <div class="field-error" id="err-q25">Please select an option.</div>
+        </div>
+      </div>
+
+      <div class="nav-footer">
+        <button class="btn btn-secondary" onclick="goToStep('step-D')">← Back</button>
+        <button class="btn btn-primary" onclick="nextSection('E')">Continue →</button>
+      </div>
+    </div>
+
+    <!-- ===================== SECTION F: EXPERIENCE ===================== -->
+    <div class="card" id="step-F">
+      <div class="section-header">
+        <div class="section-header-letter">F</div>
+        <div class="section-header-info">
+          <div class="section-header-title">Experience &amp; Portfolio</div>
+          <div class="section-header-desc">Volume, niche, and proof of work</div>
+        </div>
+      </div>
+
+      <div class="q-group">
+        <div class="q-item">
+          <span class="q-num">Q26</span>
+          <label class="q-label">Years editing short-form video (vertical, under 90 seconds) <span class="req">*</span></label>
+          <div class="choices choices--inline">
+            <label class="choice-item" onclick="selectChoice(this,'q26')">
+              <input type="radio" name="q26" value="lt1"> <span class="choice-label">Less than 1</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q26')">
+              <input type="radio" name="q26" value="1-2"> <span class="choice-label">1–2 years</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q26')">
+              <input type="radio" name="q26" value="3-5"> <span class="choice-label">3–5 years</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q26')">
+              <input type="radio" name="q26" value="5plus"> <span class="choice-label">5+ years</span>
+            </label>
+          </div>
+          <div class="field-error" id="err-q26">Please select an option.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q27</span>
+          <label class="q-label">Short-form clips delivered for paid work <span class="req">*</span></label>
+          <div class="choices choices--inline">
+            <label class="choice-item" onclick="selectChoice(this,'q27')">
+              <input type="radio" name="q27" value="lt50"> <span class="choice-label">Fewer than 50</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q27')">
+              <input type="radio" name="q27" value="50-200"> <span class="choice-label">50–200</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q27')">
+              <input type="radio" name="q27" value="200-500"> <span class="choice-label">200–500</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q27')">
+              <input type="radio" name="q27" value="500plus"> <span class="choice-label">500+</span>
+            </label>
+          </div>
+          <div class="field-error" id="err-q27">Please select an option.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q28</span>
+          <label class="q-label">Niches you've edited in <span class="req">*</span> <em style="font-size:12px;color:var(--muted);font-style:normal;font-weight:400">(select all that apply)</em></label>
+          <div class="choices choices--inline">
+            <label class="choice-item" onclick="selectChoice(this,'q28',true)"><input type="checkbox" name="q28" value="saas"> <span class="choice-label">SaaS / Tech</span></label>
+            <label class="choice-item" onclick="selectChoice(this,'q28',true)"><input type="checkbox" name="q28" value="founder"> <span class="choice-label">Founder content</span></label>
+            <label class="choice-item" onclick="selectChoice(this,'q28',true)"><input type="checkbox" name="q28" value="testimonials"> <span class="choice-label">Testimonials &amp; customer stories</span></label>
+            <label class="choice-item" onclick="selectChoice(this,'q28',true)"><input type="checkbox" name="q28" value="coaching"> <span class="choice-label">Coaching</span></label>
+            <label class="choice-item" onclick="selectChoice(this,'q28',true)"><input type="checkbox" name="q28" value="education"> <span class="choice-label">Education</span></label>
+            <label class="choice-item" onclick="selectChoice(this,'q28',true)"><input type="checkbox" name="q28" value="agency"> <span class="choice-label">Agency content</span></label>
+            <label class="choice-item" onclick="selectChoice(this,'q28',true)"><input type="checkbox" name="q28" value="lifestyle"> <span class="choice-label">Lifestyle</span></label>
+            <label class="choice-item" onclick="selectChoice(this,'q28',true)"><input type="checkbox" name="q28" value="personal"> <span class="choice-label">Personal brand</span></label>
+            <label class="choice-item" onclick="selectChoice(this,'q28',true)"><input type="checkbox" name="q28" value="news"> <span class="choice-label">News / Commentary</span></label>
+            <label class="choice-item" onclick="selectChoice(this,'q28',true)"><input type="checkbox" name="q28" value="sports"> <span class="choice-label">Sports</span></label>
+            <label class="choice-item" onclick="selectChoice(this,'q28',true)"><input type="checkbox" name="q28" value="other"> <span class="choice-label">Other</span></label>
+          </div>
+          <div class="field-error" id="err-q28">Please select at least one niche.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q29</span>
+          <label class="q-label" for="q29">Paste 2–3 links to your best Sendblue-style work and explain in one sentence why you chose each. <span class="req">*</span></label>
+          <p class="q-hint">Looking for: clean educational talking-head, founder explanations, or proof-driven testimonial-style edits. The reasoning behind each pick reveals taste and self-awareness.</p>
+          <textarea id="q29" placeholder="Link 1: https://...&#10;Why I chose it: ..." required></textarea>
+          <div class="field-error" id="err-q29">Please share your portfolio links with explanations.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q30</span>
+          <label class="q-label" for="q30">Have you worked on B2B, SaaS, or messaging brand content? If yes, which brand(s)? <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+          <textarea id="q30" placeholder="e.g. Worked on content for Salesforce, HubSpot, Intercom..."></textarea>
+        </div>
+      </div>
+
+      <div class="nav-footer">
+        <button class="btn btn-secondary" onclick="goToStep('step-E')">← Back</button>
+        <button class="btn btn-primary" onclick="nextSection('F')">Continue →</button>
+      </div>
+    </div>
+
+    <!-- ===================== SECTION G: WORKFLOW ===================== -->
+    <div class="card" id="step-G">
+      <div class="section-header">
+        <div class="section-header-letter">G</div>
+        <div class="section-header-info">
+          <div class="section-header-title">Workflow &amp; Process</div>
+          <div class="section-header-desc">How you work, not just what you've made</div>
+        </div>
+      </div>
+
+      <div class="q-group">
+        <div class="q-item">
+          <span class="q-num">Q31</span>
+          <label class="q-label" for="q31">Walk us through your workflow from receiving raw footage to final delivery. <span class="req">*</span></label>
+          <p class="q-hint">Be specific: software, file organization, naming conventions, QC checks, delivery method.</p>
+          <textarea id="q31" required></textarea>
+          <div class="field-error" id="err-q31">Please describe your workflow.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q32</span>
+          <label class="q-label" for="q32">How do you ensure your captions have zero spelling or sync errors before delivery? <span class="req">*</span></label>
+          <textarea id="q32" required></textarea>
+          <div class="field-error" id="err-q32">Please describe your caption QC process.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q33 </span>
+          <label class="q-label">Have you applied a 10-band EQ (or similar) to balance dialogue and background music? <span class="req">*</span></label>
+          <div class="choices">
+            <label class="choice-item" onclick="selectChoice(this,'q33')">
+              <input type="radio" name="q33" value="yes-reg"> <span class="choice-label">Yes, regularly</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q33')">
+              <input type="radio" name="q33" value="yes-occ"> <span class="choice-label">Yes, occasionally</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q33')">
+              <input type="radio" name="q33" value="understand"> <span class="choice-label">No, but I understand EQ in general</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q33')">
+              <input type="radio" name="q33" value="new"> <span class="choice-label">No, I would need to learn</span>
+            </label>
+          </div>
+          <div class="field-error" id="err-q33">Please select an option.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q34</span>
+          <label class="q-label" for="q34">How do you handle a revision round where you disagree with a producer's note? <span class="req">*</span></label>
+          <p class="q-hint">Looking for: pushes back with reasoning, not ego. Mentions Frame.io or written reply.</p>
+          <textarea id="q34" required></textarea>
+          <div class="field-error" id="err-q34">Please answer this question.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q35</span>
+          <label class="q-label" for="q35">How do you keep style consistent across multiple videos in the same project? <span class="req">*</span></label>
+          <p class="q-hint">Looking for: project templates, preset folders, style guides, locked caption templates.</p>
+          <textarea id="q35" required></textarea>
+          <div class="field-error" id="err-q35">Please answer this question.</div>
+        </div>
+      </div>
+
+      <div class="nav-footer">
+        <button class="btn btn-secondary" onclick="goToStep('step-F')">← Back</button>
+        <button class="btn btn-primary" onclick="nextSection('G')">Continue →</button>
+      </div>
+    </div>
+
+    <!-- ===================== SECTION H: STRATEGIC ===================== -->
+    <div class="card" id="step-H">
+      <div class="section-header">
+        <div class="section-header-letter">H</div>
+        <div class="section-header-info">
+          <div class="section-header-title">Strategic Thinking</div>
+          <div class="section-header-desc">These questions separate technical operators from editors with taste</div>
+        </div>
+      </div>
+
+      <div class="q-group">
+        <div class="q-item">
+          <span class="q-num">Q36</span>
+          <label class="q-label" for="q36">In your own words: what's the difference between a hook and just an opening? <span class="req">*</span></label>
+          <textarea id="q36" required></textarea>
+          <div class="field-error" id="err-q36">Please answer this question.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q37</span>
+          <label class="q-label" for="q37">When would you NOT use B-roll, even if it's available? <span class="req">*</span></label>
+          <textarea id="q37" required></textarea>
+          <div class="field-error" id="err-q37">Please answer this question.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q38</span>
+          <label class="q-label" for="q38">What's the most important thing to get right in the first 3 seconds of a short-form video? <span class="req">*</span></label>
+          <textarea id="q38" required></textarea>
+          <div class="field-error" id="err-q38">Please answer this question.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q39</span>
+          <label class="q-label" for="q39">Which short-form editor or creator's editing style do you most admire, and why? <span class="req">*</span></label>
+          <p class="q-hint">Be specific about pacing, captions, sound, not just "they're cool."</p>
+          <textarea id="q39" required></textarea>
+          <div class="field-error" id="err-q39">Please answer this question.</div>
+        </div>
+      </div>
+
+      <div class="nav-footer">
+        <button class="btn btn-secondary" onclick="goToStep('step-G')">← Back</button>
+        <button class="btn btn-primary" onclick="nextSection('H')">Continue →</button>
+      </div>
+    </div>
+
+    <!-- ===================== SECTION I: PRACTICAL ===================== -->
+    <div class="card" id="step-I">
+      <div class="section-header">
+        <div class="section-header-letter">I</div>
+        <div class="section-header-info">
+          <div class="section-header-title">Practical Mini-Exercise</div>
+          <div class="section-header-desc">The sharpest filter in the form. A polished portfolio plus weak answers here is a confident reject</div>
+        </div>
+      </div>
+
+      <div class="q-group">
+        <div class="q-item">
+          <span class="q-num">Q40</span>
+          <label class="q-label" for="q40">Spot every issue you can find in the caption below. List each one and explain why it's wrong. <span class="req">*</span></label>
+          <p class="q-hint">There are at least 5 distinct issues. Be specific.</p>
+          <div class="caption-box">
+            "SendBlue makes Imessage feel native for outbound teams,, sending 10000 messages in iOS18 has never been simpler."
+          </div>
+          <textarea id="q40" placeholder="Issue 1: ...&#10;Issue 2: ...&#10;Issue 3: ..." required style="min-height:140px;"></textarea>
+          <div class="field-error" id="err-q40">Please complete the caption exercise.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q41</span>
+          <label class="q-label" for="q41">Scenario: You receive a 60-second testimonial clip. The CEO opens with "Yeah, so, basically what we found was…" and then makes a great point at the 0:18 mark. The brief asks for a 30-second short. Walk us through what you'd cut and how you'd reshape it. <span class="req">*</span></label>
+          <textarea id="q41" required style="min-height:130px;"></textarea>
+          <div class="field-error" id="err-q41">Please complete the scenario response.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q42 — <em style="font-size:12px;color:var(--muted);font-style:normal;font-weight:600">Scored 0–3 pts · Engagement signal</em> <span style="color:var(--muted);font-weight:400;font-size:12px;">(optional but strongly recommended)</span></span>
+          <label class="q-label" for="q42">Style match: Copy and paste this link into your browser to watch a Sendblue example clip: <strong style="color:var(--navy);user-select:all;">https://www.youtube.com/shorts/zNRm4XTIQDU</strong> — then describe in 3–5 sentences what's working in the edit, and one thing you'd do differently.</label>
+          <textarea id="q42" placeholder="What's working:&#10;What I'd change:"></textarea>
+        </div>
+      </div>
+
+      <div class="nav-footer">
+        <button class="btn btn-secondary" onclick="goToStep('step-H')">← Back</button>
+        <button class="btn btn-primary" onclick="nextSection('I')">Continue →</button>
+      </div>
+    </div>
+
+    <!-- ===================== SECTION J: AVAILABILITY ===================== -->
+    <div class="card" id="step-J">
+      <div class="section-header">
+        <div class="section-header-letter">J</div>
+        <div class="section-header-info">
+          <div class="section-header-title">Availability &amp; Commercial</div>
+          <div class="section-header-desc">Capacity, timing, and rate. Better to know upfront</div>
+        </div>
+      </div>
+
+      <div class="q-group">
+        <div class="q-item">
+          <span class="q-num">Q43</span>
+          <label class="q-label">How many short-form videos can you reliably deliver per week? <span class="req">*</span></label>
+          <p class="q-hint">Assuming briefs and footage are ready.</p>
+          <div class="choices choices--inline">
+            <label class="choice-item" onclick="selectChoice(this,'q43')">
+              <input type="radio" name="q43" value="1-3"> <span class="choice-label">1–3</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q43')">
+              <input type="radio" name="q43" value="4-7"> <span class="choice-label">4–7</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q43')">
+              <input type="radio" name="q43" value="8-12"> <span class="choice-label">8–12</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q43')">
+              <input type="radio" name="q43" value="12plus"> <span class="choice-label">More than 12</span>
+            </label>
+          </div>
+          <div class="field-error" id="err-q43">Please select an option.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q44</span>
+          <label class="q-label" for="q44">Earliest available start date <span class="req">*</span></label>
+          <input type="date" id="q44" required>
+          <div class="field-error" id="err-q44">Please select a start date.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q45 </span>
+          <label class="q-label">Hours of overlap with US Pacific Time (9 AM–5 PM PT) <span class="req">*</span></label>
+          <div class="choices choices--inline">
+            <label class="choice-item" onclick="selectChoice(this,'q45')">
+              <input type="radio" name="q45" value="lt2"> <span class="choice-label">Less than 2 hrs</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q45')">
+              <input type="radio" name="q45" value="2-4"> <span class="choice-label">2–4 hrs</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q45')">
+              <input type="radio" name="q45" value="4-6"> <span class="choice-label">4–6 hrs</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q45')">
+              <input type="radio" name="q45" value="full"> <span class="choice-label">Full overlap</span>
+            </label>
+          </div>
+          <div class="field-error" id="err-q45">Please select an option.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q46</span>
+          <label class="q-label" for="q46">Do you currently have other ongoing editing clients? If yes, describe your weekly load. <span class="req">*</span></label>
+          <textarea id="q46" placeholder="e.g. Currently editing for 2 clients, ~10 videos/week. Looking to add Sendblue as a 3rd." required></textarea>
+          <div class="field-error" id="err-q46">Please answer this question.</div>
+        </div>
+
+        <div class="q-item">
+          <span class="q-num">Q47</span>
+          <label class="q-label">Typical rate: choose the format you usually work in <span class="req">*</span></label>
+          <div class="choices choices--inline" style="margin-bottom:10px;">
+            <label class="choice-item" onclick="selectChoice(this,'q47')">
+              <input type="radio" name="q47" value="per-video"> <span class="choice-label">Per video / per edit</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q47')">
+              <input type="radio" name="q47" value="hourly"> <span class="choice-label">Hourly</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q47')">
+              <input type="radio" name="q47" value="retainer"> <span class="choice-label">Monthly retainer</span>
+            </label>
+            <label class="choice-item" onclick="selectChoice(this,'q47')">
+              <input type="radio" name="q47" value="open"> <span class="choice-label">Open to discussion</span>
+            </label>
+          </div>
+          <input type="text" id="q47b" placeholder="Typical range, e.g. $75–$120/video or $45/hr">
+          <div class="field-error" id="err-q47">Please select a rate format.</div>
+        </div>
+      </div>
+
+      <div class="nav-footer">
+        <button class="btn btn-secondary" onclick="goToStep('step-I')">← Back</button>
+        <button class="btn btn-primary" onclick="nextSection('J')">Continue →</button>
+      </div>
+    </div>
+
+    <!-- ===================== SECTION K: ACKNOWLEDGEMENTS ===================== -->
+    <div class="card" id="step-K">
+      <div class="section-header">
+        <div class="section-header-letter">K</div>
+        <div class="section-header-info">
+          <div class="section-header-title">Acknowledgements &amp; Close</div>
+          <div class="section-header-desc">Three commitments, drawn directly from our non-negotiables. Saying yes here is on the record.</div>
+        </div>
+      </div>
+
+      <div class="q-group">
+
+        <div class="ack-item">
+          <div class="ack-icon">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#AEB2EB" stroke-width="1.5" stroke-linecap="round">
+              <path d="M3 9l4 4 8-8"/>
+            </svg>
+          </div>
+          <div class="ack-body">
+            <div class="ack-title">Zero caption or spelling errors, no exceptions</div>
+            <div class="ack-desc">Sendblue requires every short to ship with zero spelling or caption errors. Every. Single. One.</div>
+          </div>
+        </div>
+        <div class="q-item">
+          <span class="q-num">Q48 </span>
+          <label class="q-label">Are you fully comfortable working to that standard? <span class="req">*</span></label>
+          <div class="yn-wrap">
+            <button type="button" class="yn-btn" onclick="selectYN(this,'q48','yes')">Yes, fully committed</button>
+            <button type="button" class="yn-btn" onclick="selectYN(this,'q48','no')">No</button>
+          </div>
+          <div class="field-error" id="err-q48">Please answer this question.</div>
+        </div>
+
+        <div class="card-divider"></div>
+
+        <div class="ack-item">
+          <div class="ack-icon">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#AEB2EB" stroke-width="1.5" stroke-linecap="round">
+              <circle cx="9" cy="9" r="6"/><path d="M9 5v4l2 2"/>
+            </svg>
+          </div>
+          <div class="ack-body">
+            <div class="ack-title">Quality headphones during all editing sessions</div>
+            <div class="ack-desc">Wired or studio-grade. Required for audio QC. Non-negotiable per our onboarding standard.</div>
+          </div>
+        </div>
+        <div class="q-item">
+          <span class="q-num">Q49 </span>
+          <label class="q-label">Confirm you'll wear headphones consistently during all editing sessions. <span class="req">*</span></label>
+          <div class="yn-wrap">
+            <button type="button" class="yn-btn" onclick="selectYN(this,'q49','yes')">Yes, confirmed</button>
+            <button type="button" class="yn-btn" onclick="selectYN(this,'q49','no')">No</button>
+          </div>
+          <div class="field-error" id="err-q49">Please answer this question.</div>
+        </div>
+
+        <div class="card-divider"></div>
+
+        <div class="ack-item">
+          <div class="ack-icon">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#AEB2EB" stroke-width="1.5" stroke-linecap="round">
+              <rect x="3" y="5" width="12" height="9" rx="1.5"/>
+              <path d="M6 5V4a3 3 0 016 0v1"/>
+            </svg>
+          </div>
+          <div class="ack-body">
+            <div class="ack-title">Approved delivery channels only: Google Drive or Frame.io</div>
+            <div class="ack-desc">Never iMessage, Slack, or email. Final files go to Drive or Frame.io. Period..</div>
+          </div>
+        </div>
+        <div class="q-item">
+          <span class="q-num">Q50 </span>
+          <label class="q-label">Confirm you'll deliver via Google Drive or Frame.io only. <span class="req">*</span></label>
+          <div class="yn-wrap">
+            <button type="button" class="yn-btn" onclick="selectYN(this,'q50','yes')">Yes, confirmed</button>
+            <button type="button" class="yn-btn" onclick="selectYN(this,'q50','no')">No</button>
+          </div>
+          <div class="field-error" id="err-q50">Please answer this question.</div>
+        </div>
+
+        <div class="card-divider"></div>
+
+        <div class="q-item">
+          <span class="q-num">Q51</span>
+          <label class="q-label" for="q51">Anything else you'd like us to know? <span style="color:var(--muted);font-weight:400">(optional)</span></label>
+          <p class="q-hint">A surprising number of strong candidates use this field well. Worth reading.</p>
+          <textarea id="q51" placeholder="Anything you think is relevant that the form didn't cover..."></textarea>
+        </div>
+      </div>
+
+      <div class="nav-footer">
+        <button class="btn btn-secondary" onclick="goToStep('step-J')">← Back</button>
+        <button class="btn btn-primary" onclick="submitForm()" style="padding:13px 36px;">Submit Application →</button>
+      </div>
+    </div>
+
+    <!-- ===================== DECLINE SCREEN ===================== -->
+    <div class="card card--decline" id="step-decline">
+      <div class="decline-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E05252" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/>
+        </svg>
+      </div>
+      <h2 class="decline-title">Thanks for applying</h2>
+      <p class="decline-body">Based on your responses, this role isn't quite the right fit at this time. We appreciate the time you took with the form, and we wish you the best in finding the right opportunity.</p>
+      <p style="font-size:12px;color:var(--muted);">The Sendblue Team</p>
+    </div>
+
+    <!-- ===================== THANK YOU SCREEN ===================== -->
+    <div class="card" id="step-thankyou" style="text-align:center;padding:64px 52px;">
+      <div class="thankyou-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#27AE60" stroke-width="2" stroke-linecap="round">
+          <path d="M5 13l4 4L19 7"/>
+        </svg>
+      </div>
+      <h2 class="decline-title" style="color:var(--navy);">Application submitted</h2>
+      <p class="decline-body">Thanks for taking the time to apply. We read every submission carefully. Expect to hear from us within 5 business days, regardless of outcome.<br><br>If we move forward, we'll send a short interview confirmation with everything you need to prepare. If we don't, we'll let you know directly. Either way, we appreciate the work you put into this form.</p>
+      <p style="font-size:13px;color:var(--muted);font-weight:600;">The Sendblue Team</p>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // ── STATE ──
+  const answers = {};
+  const SECTIONS = ['welcome', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'];
+  const SECTION_NAMES = {
+    welcome: 'Welcome',
+    B: 'B: Identity & Location',
+    C: 'C: Language & Communication',
+    D: 'D: Connectivity',
+    E: 'E: Hardware & Software',
+    F: 'F: Experience & Portfolio',
+    G: 'G: Workflow & Process',
+    H: 'H: Strategic Thinking',
+    I: 'I: Practical Exercise',
+    J: 'J: Availability & Commercial',
+    K: 'K: Acknowledgements'
+  };
+
+  let currentStep = 'welcome';
+
+  // Build scale buttons
+  function buildScale(id, min, max) {
+    const wrap = document.getElementById('scale-' + id);
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    for (let i = min; i <= max; i++) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'scale-btn';
+      btn.textContent = i;
+      btn.onclick = () => {
+        wrap.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        answers[id] = i;
+        clearError('err-' + id);
+      };
+      wrap.appendChild(btn);
+    }
+  }
+
+  buildScale('q11', 1, 5);
+  buildScale('q12', 1, 5);
+
+  // ── NAVIGATION ──
+  function goToStep(stepId) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+    document.getElementById(stepId).classList.add('active');
+    currentStep = stepId.replace('step-', '');
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    const meta = document.getElementById('stepMeta');
+    const isSpecial = ['welcome','decline','thankyou'].includes(currentStep);
+    meta.style.display = isSpecial ? 'none' : 'flex';
+    if (!isSpecial) {
+      document.getElementById('stepSectionLabel').textContent = SECTION_NAMES[currentStep] || '';
+      const idx = SECTIONS.indexOf(currentStep);
+      document.getElementById('stepCount').textContent = `Section ${idx} of ${SECTIONS.length - 1}`;
+    }
+
+    // Q10 logic: show/hide Q11 & Q12
+    if (currentStep === 'C') {
+      const q10val = answers['q10'];
+      const show = !q10val || q10val !== 'yes';
+      document.getElementById('q11-wrap').style.display = show ? '' : 'none';
+      document.getElementById('q12-wrap').style.display = show ? '' : 'none';
+    }
+  }
+
+  function updateProgress() {
+    const idx = SECTIONS.indexOf(currentStep);
+    const pct = idx <= 0 ? 0 : Math.round((idx / (SECTIONS.length - 1)) * 100);
+    document.getElementById('progressBar').style.width = pct + '%';
+  }
+
+  // ── CHOICE HELPERS ──
+  function selectChoice(el, qId, multi) {
+    if (!multi) {
+      el.closest('.choices').querySelectorAll('.choice-item').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      const inp = el.querySelector('input');
+      inp.checked = true;
+      answers[qId] = inp.value;
+    } else {
+      el.classList.toggle('selected');
+      const inp = el.querySelector('input');
+      inp.checked = !inp.checked;
+      const vals = [...el.closest('.choices').querySelectorAll('input:checked')].map(i => i.value);
+      answers[qId] = vals;
+    }
+    clearError('err-' + qId);
+  }
+
+  function selectYN(btn, qId, val) {
+    const wrap = btn.closest('.yn-wrap');
+    wrap.querySelectorAll('.yn-btn').forEach(b => {
+      b.classList.remove('selected-yes', 'selected-no');
+    });
+    btn.classList.add(val === 'yes' ? 'selected-yes' : 'selected-no');
+    answers[qId] = val;
+    clearError('err-' + qId);
+  }
+
+  function handleFile(input) {
+    if (input.files[0]) {
+      answers['q17'] = input.files[0];
+      document.getElementById('fileName').textContent = '✓ ' + input.files[0].name;
+      clearError('err-q17');
+    }
+  }
+
+  function clearError(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('show');
+  }
+
+  function showError(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('show');
+    return false;
+  }
+
+  // ── VALIDATION + DISQUALIFIERS ──
+  function validateSection(section) {
+    let valid = true;
+
+    function req(id, msg) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const val = (el.value || '').trim();
+      if (!val) { showError('err-' + id); valid = false; }
+    }
+
+    function reqRadio(name, errId) {
+      const checked = document.querySelector(`input[name="${name}"]:checked`);
+      if (!checked) { showError(errId || 'err-' + name); valid = false; }
+    }
+
+    function reqYN(qId) {
+      if (!answers[qId]) { showError('err-' + qId); valid = false; }
+    }
+
+    if (section === 'B') {
+      req('q1'); req('q2');
+      const email = document.getElementById('q3').value.trim();
+      if (!email || !email.includes('@')) { showError('err-q3'); valid = false; }
+      if (!document.getElementById('q5').value) { showError('err-q5'); valid = false; }
+      req('q6'); 
+      if (!document.getElementById('q7').value) { showError('err-q7'); valid = false; }
+      reqYN('q8');
+      const url = document.getElementById('q9').value.trim();
+      if (!url || !url.startsWith('http')) { showError('err-q9'); valid = false; }
+
+      if (valid && answers['q8'] === 'no') {
+        goToStep('step-decline'); return false;
+      }
+    }
+
+    if (section === 'C') {
+      reqRadio('q10', 'err-q10');
+      const q10val = answers['q10'];
+      if (q10val !== 'yes' && q10val !== 'bilingual') {
+        if (!answers['q11']) { showError('err-q11'); valid = false; }
+        if (!answers['q12']) { showError('err-q12'); valid = false; }
+      }
+      reqYN('q14');
+
+      if (valid && answers['q14'] === 'no') {
+        goToStep('step-decline'); return false;
+      }
+    }
+
+    if (section === 'D') {
+      const dl = parseFloat(document.getElementById('q15').value);
+      const ul = parseFloat(document.getElementById('q16').value);
+      if (isNaN(dl) || dl < 0) { showError('err-q15'); valid = false; }
+      if (isNaN(ul) || ul < 0) { showError('err-q16'); valid = false; }
+      if (!answers['q17']) { showError('err-q17'); valid = false; }
+      reqRadio('q18', 'err-q18');
+      reqYN('q19');
+
+      if (valid) {
+        if (ul < 10 || answers['q18'] === 'frequent') {
+          goToStep('step-decline'); return false;
+        }
+      }
+    }
+
+    if (section === 'E') {
+      reqRadio('q20', 'err-q20');
+      req('q21');
+      reqYN('q22');
+      const checked = document.querySelectorAll('input[name="q23"]:checked');
+      if (!checked.length) { showError('err-q23'); valid = false; }
+      reqRadio('q24', 'err-q24');
+      reqRadio('q25', 'err-q25');
+
+      if (valid && answers['q22'] === 'no') {
+        goToStep('step-decline'); return false;
+      }
+    }
+
+    if (section === 'F') {
+      reqRadio('q26', 'err-q26');
+      reqRadio('q27', 'err-q27');
+      const checked28 = document.querySelectorAll('input[name="q28"]:checked');
+      if (!checked28.length) { showError('err-q28'); valid = false; }
+      req('q29');
+    }
+
+    if (section === 'G') {
+      req('q31'); req('q32');
+      reqRadio('q33', 'err-q33');
+      req('q34'); req('q35');
+    }
+
+    if (section === 'H') {
+      req('q36'); req('q37'); req('q38'); req('q39');
+    }
+
+    if (section === 'I') {
+      req('q40'); req('q41');
+    }
+
+    if (section === 'J') {
+      reqRadio('q43', 'err-q43');
+      if (!document.getElementById('q44').value) { showError('err-q44'); valid = false; }
+      reqRadio('q45', 'err-q45');
+      req('q46');
+      reqRadio('q47', 'err-q47');
+    }
+
+    if (section === 'K') {
+      reqYN('q48'); reqYN('q49'); reqYN('q50');
+
+      if (valid) {
+        if (answers['q48'] === 'no' || answers['q49'] === 'no' || answers['q50'] === 'no') {
+          goToStep('step-decline'); return false;
+        }
+      }
+    }
+
+    return valid;
+  }
+
+  const SECTION_MAP = { B:'C', C:'D', D:'E', E:'F', F:'G', G:'H', H:'I', I:'J', J:'K' };
+
+  function nextSection(current) {
+    if (!validateSection(current)) return;
+    const next = SECTION_MAP[current];
+    if (next) goToStep('step-' + next);
+  }
+
+  async function submitForm() {
+    if (!validateSection('K')) return;
+
+    // Collect all text-based answers
+    const fields = [
+      'q1','q2','q3','q4','q5','q6','q7','q9','q13',
+      'q15','q16','q21','q29','q30','q31','q32','q34','q35',
+      'q36','q37','q38','q39','q40','q41','q42','q46','q47b','q51'
+    ];
+
+    const data = new FormData();
+
+    fields.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.value) data.append(id, el.value);
+    });
+
+    // Radio / checkbox answers stored in answers{}
+    const answerKeys = ['q8','q10','q11','q12','q14','q18','q19','q20','q22',
+      'q23','q24','q25','q26','q27','q28','q33','q43','q44','q45','q47',
+      'q48','q49','q50'];
+    answerKeys.forEach(k => {
+      if (answers[k] !== undefined) {
+        const val = Array.isArray(answers[k]) ? answers[k].join(', ') : answers[k];
+        data.append(k, val);
+      }
+    });
+
+    // Date field
+    const q44 = document.getElementById('q44');
+    if (q44 && q44.value) data.append('q44', q44.value);
+
+    // File upload
+    const q17 = document.getElementById('q17');
+    if (q17 && q17.files[0]) data.append('q17_speedtest', q17.files[0]);
+
+    try {
+      const res = await fetch('https://formspree.io/f/mdabnqyz', {
+        method: 'POST',
+        body: data,
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (res.ok) {
+        goToStep('step-thankyou');
+        document.getElementById('progressBar').style.width = '100%';
+      } else {
+        alert('Something went wrong submitting the form. Please try again.');
+      }
+    } catch (e) {
+      alert('Network error. Please check your connection and try again.');
+    }
+  }
+
+  // ── Q10 LOGIC — hide Q11/Q12 if native ──
+  document.querySelectorAll('input[name="q10"]').forEach(inp => {
+    inp.addEventListener('change', () => {
+      const isNative = inp.value === 'yes' || inp.value === 'bilingual';
+      document.getElementById('q11-wrap').style.display = isNative ? 'none' : '';
+      document.getElementById('q12-wrap').style.display = isNative ? 'none' : '';
+    });
+  });
+
+  // ── VIDEO COUNTDOWN ──
+  let videoSeconds = 284; // 4:44
+  const countdownEl = document.getElementById('countdown');
+  const letsGoBtn = document.getElementById('letsGoBtn');
+
+  const videoTimer = setInterval(() => {
+    videoSeconds--;
+    const m = Math.floor(videoSeconds / 60);
+    const s = videoSeconds % 60;
+    countdownEl.textContent = m + ':' + String(s).padStart(2, '0');
+    if (videoSeconds <= 0) {
+      clearInterval(videoTimer);
+      letsGoBtn.disabled = false;
+      letsGoBtn.style.opacity = '1';
+      letsGoBtn.style.cursor = 'pointer';
+      letsGoBtn.innerHTML = "Let's go →";
+    }
+  }, 1000);
+
+  // ── INIT ──
+  goToStep('step-welcome');
+</script>
+
+</body>
+</html>
